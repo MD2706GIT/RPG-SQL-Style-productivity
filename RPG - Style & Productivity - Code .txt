@@ -1,0 +1,2066 @@
+-- page 5
+ctl-opt decedit('0,') datedit(*dmy.)     
+ dftactgrp(*no) actgrp(*caller)   
+ option(*srcstmt : *nodebugio : *noexpdds) ;   
+
+-- page 7
+dcl-f Param00f disk usage(*input) ;           
+
+dcl-f Param01l usage(*input) keyed ;           
+
+dcl-f Param01l keyed usage(*update:*output:*delete)   
+                     rename(Param:Param01) prefix(P_) ;      
+
+-- page 8
+dcl-f XSQL0001P printer(132) oflind(overflow);     
+dcl-s overflow  ind;                               
+
+dcl-f XSQL004V  workstn sfile(SFL01:nrr01) ;        
+
+dcl-c EOF 100;
+dcl-c VOCALS const('AEIOU');
+
+-- page 9
+dcl-s  i         packed(3:0);         
+dcl-s  codCli    char(8);             
+dcl-s  blocked   ind;                 
+dcl-s  dueDate   date;                
+dcl-s  totalQty  like(OrderQty) ;    
+dcl-s  orders    like(OrderCode) dim(100);   // array        
+
+dcl-c LEN_CODCLI  8;
+
+dcl-s  codCliOrdine    char(LEN_CODCLI);             
+dcl-s  codCliFattura   char(LEN_CODCLI);             
+dcl-s  codCliPagamento char(LEN_CODCLI);             
+
+dcl-s  dtversion  char(10) dtaara('DTVER');  
+
+dcl-ds lda dtaara(*lda);     
+end-ds;                       
+
+-- page 10
+dcl-ds lda dtaara(*lda);    
+    ldaf01  char(1) ;       
+    ldaf02  char(8) ;       
+    ldaf03  packed(5:0);    
+end-ds;                     
+
+dcl-ds lda extname('DSLDA') dtaara(*lda);       
+end-ds;           
+. . . 
+in lda;                              
+
+// internal DS 
+dcl-ds DS01 qualified;              
+   cod      like(CodCliente);       
+   naz      like(NazCl);            
+   loc      like(LocCl);            
+end-ds;     
+
+// unnamed internal DS 
+dcl-ds *n;              
+   naz      char(2);       
+   chk      char(2);       
+   cin      char(1);       
+   abi      char(5);       
+   cab      char(5);       
+   ccc      char(12);       
+end-ds;                                                     
+
+// external DS 
+dcl-ds DSAncli extname('ANCLI00F') end-ds;
+// or 
+dcl-ds Ancli00f ext end-ds;
+
+-- page 11
+dcl-ds DSAncli extname('ANCLI00F') ;
+   numeroOrdini   zoned(5:0);
+   totaleValore   zoned(11:2);
+end-ds;
+
+// internal DS–IBAN code
+dcl-ds *n;              
+   iban     char(27) pos(1);
+   naz      char(2)  pos(1);       
+   chk      char(2)  pos(3);       
+   cin      char(1)  pos(5);       
+   abi      char(5)  pos(6);       
+   cab      char(5)  pos(11);       
+   ccc      char(12) pos(16);       
+end-ds;                                                     
+
+// internal DS–IBAN code
+dcl-ds *n;              
+   iban     char(27);
+   naz      char(2)  overlay(iban:1);       
+   chk      char(2)  overlay(iban:3);       
+   cin      char(1)  overlay(iban:5);       
+   abi      char(5)  overlay(iban:6);       
+   cab      char(5)  overlay(iban:11);       
+   ccc      char(12) overlay(iban:16);       
+end-ds;                                                     
+
+-- page 12
+dcl-ds DSCli qualified;         
+   cod      like(CodCliente);   
+   naz      like(NazCl);        
+   loc      like(LocCl);        
+   dcl-ds   address;          
+        toponyim   char(30);    
+        houseNr    char(5);     
+   end-ds;                      
+   name     char(40);     
+end-ds;                         
+
+dcl-ds DSCli2 likeds(DSCli);
+
+dcl-ds DSCli3 likerec(Ancli:*input);         
+
+// PSDS internally defined
+dcl-ds PgmDS psds qualified;       
+   PgmName   *proc;
+   PgmParms  *parms;
+end-ds;           
+
+// PSDS externally defined
+dcl-ds PgmDS extname('PSDS') psds qualified       
+end-ds;           
+
+-- page 13
+dcl-pr get_Date  char(10);         
+    pDateIn    char(10)   const;   
+    pDays      zoned(3:0) const;   
+end-pr;                            
+. . . 
+// ------ get_Date -------------------------------------  
+// Add/subtract days to a date
+
+ dcl-proc  get_Date ;                                       
+ dcl-pi    *n   char(10);                                          
+     pDateIn    char(10)   const;                                  
+     pDays      zoned(3:0) const;                                  
+ end-pi;                                                           
+                                                                   
+ dcl-s  dateOut   char(10);                                        
+                                                                   
+ dateOut = %char(%date(pDateIn:*iso0) + %days(pDays):*iso0);       
+                                                                   
+ return dateOut;                                                   
+                                                                   
+ end-proc;                                                         
+
+// Invocation of a procedure receiving parameters and 
+// returning a value
+date = get_Date(date:15) ;        
+
+// Invocation of a procedure with no parameters
+Time = getSystemTime();
+
+-- page 14
+dcl-proc  get_Date export ;                                       
+
+// Prototype definition
+dcl-pr  <procedureName> <output: type + size> ;
+   <parameter: name , type + size > ;
+   . . . 
+end-pr ;
+
+// Procedure definition
+dcl-proc <procedureName> ;
+dcl-pi   *n <output: type + size>  ;
+   <parametro: nome , type + size> ;
+   . . . 
+end-pi ;
+. . . other definitions
+. . . business logic
+end-proc;
+
+dcl-pi main  extpgm('TESTR06');  
+   pParm     char(100);          
+end-pr;                          
+
+-- page 15
+dcl-pi TESTR06;          
+   pParm     char(100);          
+end-pi;                  
+
+-- page 16
+sqlstmt = 'UPDATE Ancli00f SET &C = :info ' +
+'WHERE &W' ;
+// Sets column to be updated
+select;
+when campo = '1' ; // Company name
+  sqlstmt = %scanrpl('&C':'RASCL':sqlstmt);
+  sqlstmt = %scanrpl('&W':
+	    'RASCL=' +$a + ' ' + $a:
+	    sqlstmt);
+when campo = '2' ;  // Address
+  sqlstmt = %scanrpl('&C':'INDCL':sqlstmt);
+  sqlstmt = %scanrpl('&W':
+	    'INDCL=' +$a + ' ' + $a:
+	    sqlstmt);
+when campo = '3' ; // City
+  sqlstmt = %scanrpl('&C':'LOCCL':sqlstmt);
+  sqlstmt = %scanrpl('&W':
+	    'LOCCL=' +$a + ' ' + $a:
+	    sqlstmt);
+endsl;
+
+-- page 17
+dcl-s campoChar   char(15);
+dcl-s campoNum    zoned(9:2);
+
+monitor;
+  campoNum = 123.45;
+  campoChar = %editc(campoNum:'3');
+  // CAMPOCHAR => '    123.45     ' 
+  campoChar = %editc(campoNum:'Z');
+  // CAMPOCHAR => '    12345      '
+  campoChar = %editw(campoNum:'$      0,  ');
+  // CAMPOCHAR => '$    123,45    ' 
+on-error;   
+endmon;
+
+*inlr = *on;
+return;
+
+
+dcl-s maxdate  date;
+dcl-s mindate  date;
+dcl-s date01   date;
+dcl-s date02   date;
+dcl-s date03   date;
+. . . .
+date01 = d'2014-05-01';
+date02 = d'2012-12-31';
+date03 = d'2013-01-01';
+maxdate = %max(date01:date02:date03) ;
+mindate = %min(date01:date02:date03) ;
+
+// maxdate --> '2014-05-01'
+// mindate --> '2012-12-31'
+
+-- page 18
+dcl-s date01   date;
+dcl-s date02   date;
+. . . 
+ date01 = %date(25122017:*EUR);
+ // date01 = '2017-12-25'
+ date02 = %date('301117':*DMY0);
+ // date02 = '2017-11-30'
+
+-- page 19
+timeupd = %timestamp();
+// timeupd --> '2017-05-01-11.23.45.000000'
+
+ date01 = %date(25122017:*EUR);
+ date02 = %date('301116':*DMY0);
+ 
+ num = %diff(date01:date02:*D);
+ // num = 390
+ num = %diff(date01:date02:*M); 
+ // num = 12
+
+ // difference in days with today's date
+ num = %diff(%date():date02:*D);
+
+-- page 20
+// Check if payment was made in June
+if %subdt(datapag:*M) = 6; 
+
+Sets a random number from 0 to 999 with microseconds
+num = %subdt(%timestamp():*MS) / 1000;
+
+-- page 21
+dcl-s value_t    varchar(50); 
+// Ds for receiving XML data
+dcl-ds Orders             qualified;
+  Order                  likeDS(Order) dim(9);
+  numOrder               int(10);
+end-ds;
+
+dcl-ds Order              qualified;
+  Customer               like(value_t);
+  Date                   like(value_t);
+  line                   likeDS(Line) dim(9);
+  numLine                int(10);
+end-ds;
+dcl-ds Line;
+  article                like(value_t);
+  um                     like(value_t);
+  quantity               like(value_t);
+  dueDate                like(value_t);
+end-ds;
+
+-- page 23
+XML-INTO Orders
+  %XML(%trim(xmlFile) :
+  'doc=file case=any allowextra=yes allowmissing=yes +
+  countprefix=num'
+  );
+// XML parsing completed normally
+// Start reading data from Orders DS and 
+// related subDS
+for i = 1 to Orders.numorder;
+	qsysprtDs = 'Client: '
+		 + %TRIM(Orders.Order(i).customer)
+		 + ' Date:'
+		 + %TRIM(Orders.Order(i).date)
+		 ;
+	write qsysprt qsysprtDs;
+	for l = 1 to Orders.Order(i).numLine;
+	  qsysprtDs = '-- Line: ' + %CHAR(l)
+			  + '  Artic:'
+			  + %TRIM(Orders.Order(i).Line(l).article)
+			  + ' ' + %TRIM(Orders.Order(i).Line(l).um)
+			  + ' ' + %TRIM(Orders.Order(i).Line(l).quantity)
+			  + ' ' + %TRIM(Orders.Order(i).Line(l).duedate)
+			  ;
+	   write qsysprt qsysprtDs;
+	endfor;
+endfor;
+
+-- page 25
+dcl-pr OrderHandler   int(10);
+  ordCount           int(10);
+  order              likeds(OrderDS) dim(1) const;
+  elements           int(10) value;
+end-pr;
+dcl-s ordCount int(10);
+
+// ---------------------------------------------------------
+// HANDLER
+// ---------------------------------------------------------
+dcl-proc OrderHandler;
+dcl-pi   OrderHandler int(10);
+  ordCount           int(10);
+  order              likeds(OrderDS) dim(1) const;
+  elements           int(10) value;
+end-pi;
+
+dcl-s p   packed(5:0);
+dcl-s q   packed(5:0);
+
+ordCount += 1;
+for p = 1 to %elem(order);
+  if order(p).customer = *blank;
+     leave;
+  endif;
+     qsysprtDs = 'Client: '
+            + %TRIM(Order(p).customer)
+            + ' Date:'
+            + %TRIM(Order(p).date)
+            ;
+     write qsysprt qsysprtDs;
+     for q = 1 to %elem(order.line);
+        if Order(p).Line(q).article = *blank;
+           leave;
+        endif;
+        qsysprtDs = 
+              '-- Line: ' + %CHAR(q)
+        + '  Artic:'
+        +  %TRIM(Order(p).Line(q).article)
+        + ' ' + %TRIM(Order(p).Line(q).um)
+        + ' ' + %TRIM(Order(p).Line(q).quantity)
+        + ' ' + %TRIM(Order(p).Line(q).duedate)
+        ;
+         write qsysprt qsysprtDs;
+     endfor;
+
+endfor;
+
+return 0;
+end-proc;      
+
+-- page 28
+dcl-ds myHandlerInfo      likeDS(handlerInfo_t); 
+                                                
+dcl-pr mySaxHandler   int(10);                  
+   info               likeDS(handlerInfo_t);    
+   event              int(10) value;            
+   stringPtr          pointer value;            
+   stringLen          int(20) value;            
+   exceptionId        int(10) value;            
+end-pr;                                         
+
+dcl-s value_t   varchar(50) ;                                     
+dcl-ds handlerInfo_t      qualified based(dummy);                 
+   pValue                 pointer;                                
+   DSOrd                  likeDS(DSOrd);                          
+   alwExtraAttr           ind;                                    
+   handlingAttrs          ind;                                    
+end-ds;                                                           
+// DS with all single fields to be taken from XML document      
+dcl-ds DSOrd qualified;                                           
+       oCustomer   like(value_t);                                 
+       oDate       like(value_t);                                 
+       oArticle    like(value_t);                                 
+       oLine       like(value_t);                                 
+       oQty        like(value_t);                                 
+       oArticleum  like(value_t);                                 
+       oDuedate    like(value_t);                                 
+       oQtyDeliv   like(value_t);                                 
+       oDueDateDeliv    like(value_t);                            
+end-ds;                                                           
+
+-- page 44
+/* SRVPGM0B - Binder source for SRVPGM0             */        
+StrPgmExp PgmLvl( *Current ) Signature('20171025')            
+ Export Symbol( get_Date  )                                   
+ Export Symbol( cnv_UM    )                                   
+ Export Symbol( is_Job_Active )                               
+EndPgmExp                                                     
+                                                              
+StrPgmExp PgmLvl( *Prv ) Signature('20171001')                
+ Export Symbol( get_Date  )                                   
+ Export Symbol( cnv_UM    )                                   
+EndPgmExp                                                     
+
+
+// SRVPGM0C – Procedure prototypes for SRVPGM0 
+// ------ get_Date ---------------------------------- 
+// adds days to a date    
+dcl-pr    get_Date  char(10) ; 
+	*n    char(10) const;       // date YYYYMMDD  
+	*n    zoned(3:0) const;     // days 
+end-pr; 
+// ------ cnv_UM ------------------------------------
+// U/M conversion      
+dcl-pr    cnv_UM    zoned(15:5) ; 
+	*n    char(02)  const;    // from UM 
+	*n    char(02)  const;    // to UM 
+	*n    zoned(15:5) const;  // quantity 
+end-pr;  
+
+-- page 45
+// Program TESTR07B -------------------------------
+// Invokes  SRVPGM0 ------------------------  
+ctl-opt  option(*srcstmt:*nodebugio) bnddir('BNDDIR001') ;           
+// 
+dcl-pr main  extpgm('TESTR07B'); 
+end-pr; 
+dcl-pi main; 
+end-pi; 
+
+/copy qrpglesrc,SRVPGM0C 
+
+dcl-s  qty  zoned(15:5); 
+dcl-s  date char(10)   ; 
+
+*inLR=*on;  
+Exec SQL 
+  SET OPTION Commit=*none, 
+			 CloSqlCsr=*EndActGRP, 
+			 DlyPrp=*YES 
+  ; 
+qty = 1.2 ; 
+qty = cnv_UM('MT':'MM':qty) ; 
+
+date = '20181018'; 
+date = get_Date(date:18) ;   
+							 
+return;                      
+
+-- page 50
+dcl-ds  DSAncli00f  extname(Ancli00f) end-ds;
+dcl-s   $exit   ind;
+ 
+ /copy qrpglesrc,SQLOPT 
+ 
+  Exec SQL  
+      DECLARE c1 CURSOR FOR  
+       SELECT * FROM Ancli00f  
+       WHERE  Ata10 = ' ' 
+       AND    NazCl = 'ITA'
+       ORDER BY FidoCl DESC  
+      FOR FETCH ONLY  
+      ; 
+ 
+  Exec SQL 
+     OPEN c1; 
+ 
+  $exit = *off; 
+  dow $exit = *off; 
+  Exec SQL  
+       FETCH c1 INTO :DSAncli00f;  
+ select; 
+       when SQLCODE = 0;  
+ 
+       //  < processing of fetched record >
+        . . . .
+       when SQLCODE = 100;  
+          $exit = *on;   
+other;
+   iter;
+      endsl; 
+  enddo;    
+
+-- page 51
+  Exec SQL  
+       DECLARE c1 CURSOR FOR  
+       SELECT * FROM Ancli00f  
+       WHERE  Ata10 = ' '  
+       AND    Acnaz = :codNaz 
+      FOR FETCH ONLY  
+      ;        
+
+-- page 52
+dcl-s   codice    like(CodCl);
+dcl-s   localita  like(LocCl);
+dcl-s   indirizzo like(IndCl);
+dcl-s   cap       like(CapCl);
+  Exec SQL 
+       DECLARE c1 CURSOR FOR  
+       SELECT CodCl, LocCl, IndCl, Capcl 
+       FROM Ancli00f    
+       WHERE  Ata10 = ' '   
+       AND    NazCl = 'ITA'
+       ORDER BY FidoCl DESC  
+      FOR FETCH ONLY  
+      ;
+  Exec SQL   
+       FETCH c1 INTO :codice, :localita, 
+                     :indirizzo, :cap;   
+
+-- page 53
+dcl-ds  DSAncli  extname(Ancli00f) dim(10000) qualified end-ds;
+dcl-ds  DSAncli1 extname(Ancli00f) end-ds;
+dcl-s   $exit   ind;          // loop exit flag
+dcl-s   block   packed(5:0)  inz(%elem(DAncli));  // block size
+ 
+dcl-s   r       packed(5:0);  // counter
+dcl-s   rows    packed(5:0);  // nr. of actual fetched records
+ /copy qrpglesrc,SQLOPT  
+  Exec SQL
+       DECLARE c1 CURSOR FOR
+       SELECT * FROM Ancli00f
+     WHERE  Ata10 = ' '     
+       AND   Acnaz = 'ITA' 
+       ORDER BY Accli
+       FOR READ ONLY
+       ;
+  Exec SQL
+       OPEN c1;
+  $exit = *off;
+  dow $exit = *off;
+      clear DSAncli;
+  Exec SQL
+       FETCH c1 FOR :block ROWS INTO :DSAncli;
+     select;
+        when SQLCODE = 0;
+           Exec SQL
+           GET DIAGNOSTICS :rows = ROW_COUNT ;
+           for r = 1 to rows;
+              DSAncli1 = DSAncli(r);
+           // < processing of fetched record >
+ 
+           endfor;
+        when SQLCODE = 100;
+           $exit = *on;
+        other;
+           iter;
+     endsl;
+  enddo;
+  Exec SQL
+       CLOSE c1;
+
+-- page 55
+chain codClient Ancli01l;
+if %found(Ancli01l);
+   Exec SQL                            
+     SET :city = UPPER(:LocCl);    
+      ;
+endif;                                
+
+Exec SQL                                  
+  SET :numRec = (SELECT number_rows   
+    FROM  qsys2.systablestat              
+    WHERE table_name  =:fileName              
+      AND table_schema=:fileLib            
+  ) ;                                     
+
+-- page 56
+SQLstring= 'INSERT INTO &L2.&F1 SELECT * FROM &L1.&F1' ;
+SQLstring= %scanrpl('&L2':%trim(pLibNew):StringaSQL);
+SQLstring= %scanrpl('&L1':%trim(pLibOld):StringaSQL);
+SQLstring= %scanrpl('&F1':%trim(pFile):SQLstring);
+// Data copy
+Exec SQL
+ EXECUTE IMMEDIATE :SQLstring;
+if SQLCODE <> 0;
+   errmsg = 'Error in statement: ' + %trim(SQLstring) ;
+   exsr errors;
+endif;                                                       
+
+-- page 57-58
+SELECT * 
+FROM qsys2.systables
+WHERE table_schema='MDUCA1' ;
+
+SELECT *
+FROM   qsys2.syscolumns
+WHERE  table_schema='MDUCA1'
+  AND  data_type='CHAR'
+  AND  length=8 ;
+
+SELECT a.table_name, a.table_partition
+FROM  qsys2.syspartitionstat a
+JOIN  qsys2.systables t ON 
+ (a.table_schema, a.table_name)=(t.table_schema, t.table_name)
+WHERE  a.table_schema='MDUCA1'
+  AND  t.file_type='S'
+  AND  a.table_partition='TEST003'
+
+SELECT table_schema, table_name, number_rows, number_deleted_rows 
+FROM qsys2.systablestat
+WHERE table_schema='MDUCA1' ;
+
+-- page 59
+SELECT objname, objtext, DATE(last_used_timestamp)
+FROM TABLE
+ (qsys2.object_statistics('MYLIB', '*PGM')) a
+WHERE DATE(last_used_timestamp) >= '2016-10-01'  
+ORDER BY objname
+;
+
+CALL qsys2.qcmdexc('ADDLIBLE ' CONCAT V_LIBRARY_NAME);
+
+SQLstring = 'ADDPFM FILE(TEST003) MBR(&M)';
+SQLstring = %scanrpl('&M':%trim(memberName):SQLstring);
+Exec SQL
+   CALL qsys2.qcmdexc(:SQLstring);
+
+-- page 60
+SELECT * FROM TABLE(qsys2.get_job_info('347117/Quser/Qzdasoinit')) A
+
+SELECT ordinal_position AS seq,                              
+        message_id AS msg_id,                                 
+        message_type AS msg_type,                             
+        message_subtype AS msg_subtype,                       
+        severity AS sev,                            
+        message_timestamp AS timestamp,                       
+        to_library AS lib,                                
+        CAST(to_program AS char(10)) AS pgm,              
+        SUBSTR(message_text, 9, 70) AS text 
+ FROM TABLE(qsys2.joblog_info('950119/MDUCA/LONGJOB')) a         
+ WHERE message_type='COMMAND'
+
+DCL        &SQL       *char LEN(500)  /* statement SQL  */ 
+DCL        &ap        *char LEN(1) VALUE('''')           
+RTVJOBA    JOB(&J) USER(&U) NBR(&N)                     
+CHGVAR     VAR(&SQL) VALUE('CREATE OR REPLACE TABLE +            
+        MYLIB/LOGXXJOB AS (  +         
+        SELECT ordinal_position AS seq, +               
+        message_id AS msg_id, +                         
+        message_type AS msg_type, +                     
+        message_subtype AS msg_subtype, +               
+        severity AS sev, +                              
+        message_timestamp AS timestamp, +               
+        to_library AS lib, +                            
+        CAST(to_program AS char(10)) AS pgm, +          
+        SUBSTR(message_text, 9, 60) AS text  +          
+        FROM TABLE(qsys2.joblog_info(' *CAT &ap +       
+        *CAT &n *CAT '/' *CAT &u *TCAT '/' +            
+        *TCAT &j *TCAT &ap *CAT ')) a +                 
+        WHERE message_type=' *CAT &ap *CAT 'COMMAND' +  
+        *CAT &ap *CAT +    
+        ') WITH DATA' +                 
+        )                               
+RUNSQL     SQL(&SQL) COMMIT(*NONE)      
+MONMSG     MSGID(CPF0000)       
+
+-- page 62
+// Module INDIR001                          
+// Retrieve customer address                          
+                                                          
+ctl-opt option(*srcstmt:*nodebugio) nomain ;              
+                                                          
+dcl-f  Ancli01l disk usage(*input) keyed;                 
+dcl-s  addr   char(150);                             
+                                                          
+// Procedure interface                                   
+dcl-proc get_Client_Addr  export;                       
+   dcl-pi  *n char(150);             // OUT              
+           pCodClient  char(8);      // IN               
+   end-pi;                                                
+                                                          
+   *inLR=*on;                                             
+    chain (pCodClient) Ancli01l;                         
+    if %found(Ancli01l);                                  
+       addr = %trim(IndCl) + ' ' +                   
+              %trim(LocCl) + ' ' +                   
+              %trim(CapCl) ;                         
+       if NazCl <> 'IT';                                  
+          addr = %trim(addr) + ' ' + NazCl;     
+       endif;                                             
+    else;                                                 
+       addr = *blank;   
+    endif;                   
+                             
+   return addr;         
+end-proc;                    
+
+-- page 63
+-- Function get_Client_Addr    
+-- Returns full client address in a single field      
+ 
+--                         
+--  Parameters:                      
+--  IN   Client code:  CHAR(8)            
+--  OUT  Address:      CHAR(150)       
+                                          
+CREATE OR REPLACE FUNCTION get_Client_Addr        
+  ( pCodClient  CHAR(8) )                
+RETURNS CHAR(150)                         
+                                          
+LANGUAGE RPGLE                            
+NOT DETERMINISTIC                         
+NO SQL                                    
+EXTERNAL NAME SRV001(GET_CLIENT_ADDR)    
+PARAMETER STYLE GENERAL                    
+PROGRAM TYPE SUB                                
+
+-- page 65
+-- Function get_Client_Nation                      
+--  Returns list of client for a nation       
+--                                               
+--  Parameters:                                   
+--  IN   Nation:  VARCHAR(3)                       
+--  OUT  table of clients                         
+                                                 
+CREATE OR REPLACE FUNCTION get_Client_Nation
+  ( pCodNation VARCHAR(3) )                        
+ RETURNS TABLE (                                 
+  clientCode  CHAR(8),                            
+  Name        CHAR(40),                           
+  City        CHAR(40),                           
+  Nation      CHAR(3)                             
+  )                                              
+ LANGUAGE SQL                                    
+ NOT DETERMINISTIC                               
+ NOT FENCED                                      
+ NO EXTERNAL ACTION                              
+ DISALLOW PARALLEL                               
+ CARDINALITY 20                                  
+                                                 
+ RETURN                                          
+ 
+ SELECT clientCode, Name, City, Nation   
+ FROM Ancli00f                                     
+ WHERE Annul=' ' AND                               
+  NazCl = pCodNation
+
+-- page 67
+dcl-s   codeCli    like(CodCl);
+dcl-s   nameCli    like(RasCl);
+dcl-s   cityCli    like(LocCl);
+dcl-s   natCli     like(NazCl);
+
+  Exec SQL    
+       DECLARE c1 CURSOR FOR  
+       SELECT Client, name, city, nation 
+       FROM TABLE (      
+        get_client_nation('IT')
+        ) a                
+       FOR FETCH ONLY   
+       ;
+ // OPEN + start loop
+  Exec SQL 
+       FETCH c1 INTO :codeCli, :nameCli , 
+       :cityCli , :natCli ;  
+ // etc...  
+
+-- page 68
+-- Function get_Date_Order                                                    
+--  Returns delivery dates and percentage of goods to deliver             
+--                                                                             
+--  Parameters:                                                                 
+--  IN   CHAR(8)    - Order code                                            
+--  OUT  CHAR(200)  - Delivery details                                       
+                                                                               
+CREATE OR REPLACE FUNCTION get_Date_Order(                                    
+ pOrder   VARCHAR(8) )                                                           
+RETURNS CHAR(200)                                                              
+LANGUAGE SQL                                                                   
+NOT DETERMINISTIC                                                              
+SET OPTION DBGVIEW = *SOURCE                                                   
+                                                                               
+BEGIN                                                                          
+                                                                               
+   DECLARE EOF INTEGER DEFAULT 0 ;                                             
+   DECLARE dateC    DATE       ;                                               
+   DECLARE qty      NUMERIC(15, 5) ;                                           
+   DECLARE totQty   NUMERIC(15, 5);                                            
+   DECLARE perce    CHAR ( 008 ) DEFAULT ' ' ;                                 
+   DECLARE dateDeliv CHAR ( 250 ) DEFAULT ' ' ;                                 
+   DECLARE c1 CURSOR FOR                                                 
+    SELECT DataCons, OrdQty                                              
+      FROM OrdDt00f                                                      
+      WHERE OrdNum = pOrder                                             
+    FOR READ ONLY ;                                                      
+                                                                         
+   DECLARE CONTINUE HANDLER FOR NOT FOUND SET EOF = 1 ;                  
+                                                                         
+   SET  totQty = (SELECT SUM(OrdQty) FROM OrdDT00F                       
+        WHERE OrdNum = pOrder);                                        
+                                                                         
+   OPEN c1 ;                                                             
+   FETCH c1 INTO dateC, qty     ;                                        
+   WHILE EOF = 0 DO                                                      
+      SET perce = TRIM(CHAR(CAST(qty / totQty * 100 AS NUMERIC(5, 2))))  
+                  CONCAT '%' ;                                           
+      SET dateDeliv = TRIM (dateDeliv )                                   
+          CONCAT TRIM(CHAR(DAY(dateC)))  CONCAT '-'                      
+          CONCAT TRIM(CHAR(MONTH(dateC)))  CONCAT '-'                    
+          CONCAT TRIM(CHAR(YEAR(dateC)))                                 
+          CONCAT ' ' CONCAT perce CONCAT ' : '     ;                     
+      FETCH c1 INTO dateC, qty     ;                                     
+   END WHILE ;                                                           
+   CLOSE c1 ;                                                            
+   RETURN dateDeliv;   
+                       
+END;    
+
+-- page 72
+CREATE OR REPLACE TABLE LogAncli  (                              
+-- Log data                                                  
+TimeVar     TIMESTAMP,                                           
+JobId       CHAR(28) NOT NULL DEFAULT ' ',                       
+Operazione  CHAR(2)  NOT NULL DEFAULT ' ',                       
+-- ANCLI00F columns
+Annul       CHAR(1)  NOT NULL DEFAULT ' ',                       
+CodCliente  CHAR(8) NOT NULL DEFAULT ' ',                        
+RagioneSociale     CHAR(25) NOT NULL DEFAULT ' ',                
+NazCl       CHAR(03) NOT NULL DEFAULT ' ',                       
+ProCl       CHAR(02) NOT NULL DEFAULT ' ',                       
+IndCl       CHAR(40) NOT NULL DEFAULT ' ',                       
+LocCl       CHAR(40) NOT NULL DEFAULT ' ',                       
+CapCl       CHAR(09) NOT NULL DEFAULT ' ',                       
+TimeIns     TIMESTAMP NOT NULL DEFAULT CURRENT TIMESTAMP,        
+TimeUpd     TIMESTAMP NOT NULL                                   
+)                                                                
+RCDFMT RLogAncli                                                 
+;                                                                
+LABEL ON COLUMN LogAncli (                                       
+TimeVar        TEXT IS 'last change Timestamp ' ,                  
+JobId          TEXT IS 'Job ID'           ,                  
+Operazione     TEXT IS 'Operation  type.' ,                  
+Annul          TEXT IS 'Annulment  '      ,          
+CodCliente     TEXT IS 'Client code'      ,          
+RagioneSociale TEXT IS 'Name'             ,          
+NazCl          TEXT IS 'Nation'           ,          
+ProCl          TEXT IS 'Province'         ,          
+IndCl          TEXT IS 'Address'          ,          
+LocCl          TEXT IS 'City'             ,          
+CapCl          TEXT IS 'Postal code'      ,          
+TimeIns        TEXT IS 'Timestamp insert' ,          
+TimeUpd        TEXT IS 'Timestamp last chg'                 
+)                                                        
+;  
+
+
+CREATE OR REPLACE TABLE LogAncli AS (SELECT   
+-- Log data
+CAST(NULL AS TIMESTAMP) AS TimeVar ,           
+CAST(NULL AS CHAR(28))  AS JobId      ,        
+CAST(NULL AS CHAR(2))   AS Operation ,  
+-- ANCLI00F columns     
+a.*                                            
+FROM Ancli00f a                                
+)    
+etc. . .                            
+
+
+CREATE OR REPLACE TRIGGER TRG001                           
+AFTER INSERT OR DELETE OR UPDATE ON Ancli00F               
+REFERENCING NEW ROW AS n OLD ROW AS o                      
+FOR EACH ROW MODE DB2ROW                                   
+BEGIN                                                      
+  DECLARE tstamp TIMESTAMP ;                               
+                                                           
+  IF INSERTING THEN                                        
+    INSERT INTO LogAncli                                   
+     VALUES(CURRENT TIMESTAMP,                             
+            JOB_NAME,                                      
+            'I',                                           
+            n.Annul, n.CodCliente, n.RagioneSociale,       
+            n.NazCl, n.ProCl, n.IndCl, n.LocCl, n.CapCl,   
+            n.TimeIns, n.TimeUpd                           
+            )                                              
+     ;                                                     
+  END IF ;                                                 
+ 
+  IF DELETING THEN                                         
+    INSERT INTO LogAncli                                   
+     VALUES(CURRENT TIMESTAMP,                             
+            JOB_NAME,                                      
+            'D',                                           
+            o.Annul, o.CodCliente, o.RagioneSociale,       
+            o.NazCl, o.ProCl, o.IndCl, o.LocCl, o.CapCl,   
+            o.TimeIns, o.TimeUpd                           
+            )                                              
+     ;                                                     
+  END IF ;                                                 
+                                                           
+  IF UPDATING THEN                                         
+    SET tstamp = CURRENT TIMESTAMP ;                       
+                                                           
+    INSERT INTO LogAncli                                   
+     VALUES(tstamp,                             
+            JOB_NAME,                                      
+            'UB',                                          
+            o.Annul, o.CodCliente, o.RagioneSociale,       
+            o.NazCl, o.ProCl, o.IndCl, o.LocCl, o.CapCl,   
+            o.TimeIns, o.TimeUpd                           
+            )                                              
+     ;                                                     
+    INSERT INTO LogAncli                                   
+     VALUES(tstamp,                             
+            JOB_NAME,                                      
+            'UP',                                          
+            n.Annul, n.CodCliente, n.RagioneSociale,       
+            n.NazCl, n.ProCl, n.IndCl, n.LocCl, n.CapCl,   
+            n.TimeIns, n.TimeUpd                           
+            )                                              
+     ;                                                     
+  END IF ;                                                 
+END ;                                                      
+
+
+-- page 75
+CREATE TABLE Mqt001D AS (
+SELECT
+ h.OrdDate, d.OrdNum, d.OrdCli,
+ d.Articolo, UM,
+ (OrdQty * Price * ExchgRate) Valore
+FROM  OrdDt00f d
+JOIN  OrdHd00f h ON (d.OrdNum = h.OrdNum)
+WHERE h.OrdDate = (
+ SELECT MAX(OrdDate) FROM OrdHd00f)
+)
+DATA INITIALLY DEFERRED
+REFRESH DEFERRED
+MAINTAINED BY USER
+
+
+-- page 76
+CREATE TABLE Mqt001T AS (
+SELECT
+ h.OrdCli, SUM(h.OrdValue) Totale,
+ MAX(h.OrdDate) Data_Ultimo_Ordine
+FROM  OrdHD00f h
+WHERE h.OrdDate >= (
+ CURRENT_DATE - 6 MONTHS)
+GROUP BY h.OrdCli 
+ORDER BY h.OrdCli
+)
+DATA INITIALLY DEFERRED
+REFRESH DEFERRED
+MAINTAINED BY USER
+DISABLE QUERY OPTIMIZATION
+
+
+-- page 78
+SELECT codmag, datamovimento, tipoart, articolo,
+ ROW_NUMBER() 
+ OVER(PARTITION BY tipoart, articolo
+ ORDER BY dataMovimento) numriga
+FROM mduca1.movmag00f a
+ORDER BY tipoart, articolo, dataMovimento
+
+-- page 79
+SELECT codmag, datamovimento, tipoart, articolo,
+ quantita,
+ RANK() 
+ OVER(PARTITION BY tipoart, articolo
+ ORDER BY quantita DESC) rank,
+ DENSE_RANK() 
+ OVER(PARTITION BY tipoart, articolo
+ ORDER BY quantita DESC) dense_rank 
+FROM mduca1.movmag00f a
+ORDER BY tipoart, articolo, quantita DESC
+
+
+WITH a AS (
+SELECT articolo, dataMovimento, 
+ CASE WHEN segno='+' THEN quantita
+      WHEN segno='-' THEN quantita * -1
+      END  quantita
+FROM  mduca1.movmag00f
+WHERE codMag='01'
+)
+SELECT a.*,
+ SUM(quantita)  
+ OVER(PARTITION BY articolo
+  ORDER BY dataMovimento
+ ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) saldo
+FROM a 
+ORDER BY articolo, dataMovimento
+
+-- page 80
+SELECT column_name, ordinal_position, storage, data_type,      
+SUM(storage) OVER(PARTITION BY 1                     
+ ORDER BY ordinal_position)                          
+- storage + 1 pos_start                               
+FROM   qsys2.syscolumns                             
+WHERE  table_name='ORDDT00F'                        
+  AND  table_schema = 'MDUCA1'                     
+ORDER BY ordinal_position                           
+
+-- page 81
+SELECT datamovimento, articolo, sum(quantita) carichi
+FROM  mduca1.movmag00f
+WHERE segno = '+'
+GROUP BY ROLLUP(datamovimento, articolo)
+
+
+-- page 82
+SELECT datamovimento, articolo, sum(quantita) carichi
+FROM  mduca1.movmag00f
+WHERE segno = '+'
+GROUP BY CUBE(datamovimento, articolo)
+
+
+-- page 83
+WITH a AS (
+SELECT datamovimento, segno, articolo, 
+ CASE 
+ WHEN segno='+' THEN quantita
+ WHEN segno='-' THEN -1 * quantita
+ END  quantita
+FROM  mduca1.movmag00f 
+)
+SELECT MONTH(datamovimento) mese, segno, articolo, SUM(quantita)
+FROM   a
+GROUP BY GROUPING SETS ( (MONTH(datamovimento)), 
+                         (segno), 
+                         (articolo))
+ORDER BY MONTH(datamovimento), segno, articolo
+
+-- page 85
+WITH a AS (
+SELECT MONTH(datamovimento) mese, articolo, sum(quantita) carichi
+FROM  mduca1.movmag00f
+WHERE segno = '+'
+GROUP BY MONTH(datamovimento), articolo
+)
+, b AS (
+SELECT a.*, 
+LAG(carichi, 1) OVER(PARTITION BY articolo ORDER BY mese) precedente
+FROM a
+ORDER BY articolo, mese
+)
+SELECT b.*, (carichi-precedente) diff
+FROM   b
+ORDER BY articolo, mese
+
+
+WITH a AS (
+SELECT MONTH(datamovimento) mese, articolo, sum(quantita) carichi
+FROM  mduca1.movmag00f
+WHERE segno = '+'
+GROUP BY MONTH(datamovimento), articolo
+)
+, b AS (
+SELECT a.*, 
+LEAD(carichi, 1) OVER(PARTITION BY articolo ORDER BY mese) successivo
+FROM a
+ORDER BY articolo, mese
+)
+SELECT b.*, (successivo-carichi) diff
+FROM   b
+ORDER BY articolo, mese
+
+
+-- page 89
+CREATE OR REPLACE TABLE ANAGR00F  (
+Annul       CHAR(1)  NOT NULL DEFAULT ' ',
+CodCliente  CHAR(8) NOT NULL DEFAULT ' ',
+RagioneSociale  CHAR(40) NOT NULL DEFAULT ' ' ,
+NazCl       CHAR(03) NOT NULL DEFAULT ' ',
+ProCl       CHAR(02) NOT NULL DEFAULT ' ',
+IndCl       CHAR(40) NOT NULL DEFAULT ' ' ,
+LocCl       CHAR(40) NOT NULL DEFAULT ' ' ,
+CapCl       CHAR(09) NOT NULL DEFAULT ' ',
+Telef       CHAR(20) NOT NULL DEFAULT ' ' ,
+TimeIns     TIMESTAMP NOT NULL DEFAULT CURRENT TIMESTAMP,
+TimeUpd     TIMESTAMP NOT NULL
+          FOR EACH ROW ON UPDATE AS ROW CHANGE TIMESTAMP,
+PRIMARY KEY (CodCliente)
+)
+RCDFMT Anagr
+;
+
+-- page 90
+CREATE OR REPLACE TABLE ANAGR00F  (
+Annul       CHAR(1)  NOT NULL DEFAULT ' ',
+CodCliente  CHAR(8) NOT NULL DEFAULT ' ',
+RagioneSociale  CHAR(72) NOT NULL DEFAULT ' ' FOR BIT DATA,
+NazCl       CHAR(03) NOT NULL DEFAULT ' ',
+ProCl       CHAR(02) NOT NULL DEFAULT ' ',
+IndCl       CHAR(72) NOT NULL DEFAULT ' ' FOR BIT DATA,
+LocCl       CHAR(72) NOT NULL DEFAULT ' ' FOR BIT DATA,
+CapCl       CHAR(09) NOT NULL DEFAULT ' ',
+Telef       CHAR(48) NOT NULL DEFAULT ' ' FOR BIT DATA,
+TimeIns     TIMESTAMP NOT NULL DEFAULT CURRENT TIMESTAMP,
+TimeUpd     TIMESTAMP NOT NULL
+          FOR EACH ROW ON UPDATE AS ROW CHANGE TIMESTAMP,
+PRIMARY KEY (CodCliente)
+)
+RCDFMT Anagr
+;
+
+SET ENCRYPTION PASSWORD= 'iBmdB2keY'
+
+INSERT INTO Anagr00f              
+VALUES (                          
+' ',                              
+'00000001',                       
+ENCRYPT_AES('ACME SpA'),          
+'IT ',                            
+'MI',                             
+ENCRYPT_AES('Piazza Duomo, 12'),  
+ENCRYPT_AES('MILANO'),            
+'20100',                          
+ENCRYPT_AES('02-785141459'),      
+DEFAULT ,                         
+DEFAULT                           
+)                             
+
+-- page 91
+//
+// *ENTRY PLIST
+dcl-pr main  extpgm('TESTR11');
+end-pr;
+dcl-pi main;
+end-pi;
+
+dcl-s  cliente      char(8);
+dcl-ds DS01 extname('ANAGR00F') end-ds;
+dcl-s  ecKey        char(127) dtaara('ECKEY');
+dcl-s  eKey         char(127) ;
+
+*inLR=*on;
+Exec SQL
+  SET OPTION Commit=*none,
+			 CloSqlCsr=*EndActGRP,
+			 DlyPrp=*YES
+  ;
+// Retrieve cryptographic key
+in ecKey;
+
+Exec SQL
+   SET :eKey=
+   CAST(:ecKey AS CHAR(127) CCSID 280)
+   ;
+Exec SQL
+	SET ENCRYPTION PASSWORD = :eKey
+;
+
+cliente=%subst(%char(%timestamp()): 21: 6);
+Exec SQL
+INSERT INTO Anagr00f
+VALUES (
+' ',
+:cliente  ,
+ENCRYPT_AES('ACME SpA'),
+'IT ',
+'MI',
+ENCRYPT_AES('Piazza Duomo, 12'),
+ENCRYPT_AES('MILANO'),
+'20100',
+ENCRYPT_AES('02-785141459'),
+DEFAULT ,
+DEFAULT
+)
+;
+
+return;
+
+-- page 93
+CREATE OR REPLACE TABLE ANAGR10F  (                                    
+Annul       CHAR(1)  NOT NULL DEFAULT ' ',                             
+CodCliente  CHAR(8) NOT NULL DEFAULT ' ',                              
+RagioneSociale  CHAR(40) NOT NULL DEFAULT ' ' FIELDPROC mduca1.FP001,  
+NazCl       CHAR(03) NOT NULL DEFAULT ' ',                             
+ProCl       CHAR(02) NOT NULL DEFAULT ' ',                             
+IndCl       CHAR(40) NOT NULL DEFAULT ' ' FIELDPROC mduca1.FP001,      
+LocCl       CHAR(40) NOT NULL DEFAULT ' ' FIELDPROC mduca1.FP001,      
+CapCl       CHAR(09) NOT NULL DEFAULT ' ',                             
+Telef       CHAR(20) NOT NULL DEFAULT ' ' FIELDPROC mduca1.FP001,      
+TimeIns     TIMESTAMP NOT NULL DEFAULT CURRENT TIMESTAMP,              
+TimeUpd     TIMESTAMP NOT NULL                                         
+          FOR EACH ROW ON UPDATE AS ROW CHANGE TIMESTAMP,              
+PRIMARY KEY (CodCliente)                                               
+)                                                                      
+RCDFMT Anagr1                                                          
+;                                                                      
+
+-- page 94
+Dcl-S FuncCode Int(5);
+Dcl-S p_FuncCode Pointer;
+Dcl-DS OptParms  LikeDs(SQLFOPVD);
+Dcl-DS EnCodTyp  LikeDs(SQLFPD);
+Dcl-DS DeCodTyp  LikeDs(SQLFPD);
+Dcl-S EnCodDta Char(512);
+Dcl-S DeCodDta Char(512);
+
+Dcl-S SqlState Char(5);
+Dcl-DS SqMsgTxt  LikeDs(SQLFMT);
+Dcl-DS SqFPInfo  LikeDs(SQLFI);
+
+Dcl-S i Int(10);
+Dcl-S En_ary Char(1) DIM(512) Based(En_ary_p);
+Dcl-S De_ary Char(1) DIM(512) Based(De_ary_p);
+Dcl-S e Int(10);
+Dcl-S d Int(10);
+
+Dcl-DS YPSDS         PSDS;
+  PROC_NAME *PROC;
+  PGM_STATUS *STATUS;           // Pgm status;
+  PRV_STATUS Zoned(4:0) pos(16);   // Previous status;
+  LINE_NUM   Char(7) pos(21);      // Source line;
+  ROUTINE  *ROUTINE;         // routine name;
+  PARMS    *PARMS;           // Number of parms
+  USER Char(10) pos(254);    
+  currentUserfromPSDS char(10) pos(358);
+end-ds;
+
+dcl-ds Auth dtaara len(120) end-ds;
+
+D/COPY MDUCA1/QRPGLESRC,SQLFP
+
+C     *Entry        Plist
+C                   Parm                    FuncCode
+C                   Parm                    OptParms
+C                   Parm                    DeCodTyp
+C                   Parm                    DeCodDta
+C                   Parm                    EnCodTyp
+C                   Parm                    EnCodDta
+C                   Parm                    SqlState
+C                   Parm                    SqMsgTxt
+C                   Parm                    SqFPInfo
+
+SqlState = '00000' ;
+
+select;
+when FuncCode = 8 ; // Returns attributes of encoded value
+
+  // Data type check: only fixed length CHAR fields are allowed 
+  If DeCodTyp.SQLFST <> 452 and DeCodTyp.SQLFST <> 453 ;
+	// Error: unsupported data type
+	SqlState = '38001' ;
+  Else ;
+	// Data type of encoded value is the same of 
+	//  the decoded value
+	EnCodTyp = DeCodTyp ;
+
+	// Length of encoded value is twice that of
+	//   the original value
+	EnCodTyp.SQLFL = DeCodTyp.SQLFL * 2;
+	EnCodTyp.SQLFBL = DeCodTyp.SQLFBL * 2;
+  EndIf;
+
+when FuncCode = 0 ;  // Function 0=Encoding
+  // Check if data to be encoded are masked
+  If %Subst(DeCodDta:1:4) = '****';
+	  // This setting is to inform DB2 to use
+	  // actual column value and not the masked one
+	  SqlState = '09501';
+  Else;
+	// Unmasked value: encoding
+	// sets pointers to arrays data
+	En_Ary_p = %Addr(EnCodDta);
+	De_Ary_p = %Addr(DeCodDta);
+	// sets index and counter
+	e = 1;
+	i = 1;
+	// Data encoding: each character is written in reverse order
+	// adding a number between 2 chars
+	For d = DeCodTyp.SQLFL downto 1;
+		En_Ary(e) = De_ary(d);
+		e += 1;
+		En_Ary(e) = %Char(i);
+		e += 1;
+		i += 1;
+	endfor;
+  EndIf;
+
+when FuncCode = 4 ;  // Function 4=Decoding
+	// sets pointers to arrays data
+	En_Ary_p = %Addr(EnCodDta);
+	De_Ary_p = %Addr(DeCodDta);
+	// sets index and counter
+	d = 1 ;
+	For e =  EnCodTyp.SQLFL-1 By 2 DownTo 1;
+		De_Ary(d) = En_ary(e);
+		d += 1;
+	endfor;
+
+	If SqFPInfo.SQLFNM = '0'; // Check if masking is allowed
+
+	  // Masks value for unauthorized users
+	  in Auth;
+	  if %scan(currentUserfromPSDS: Auth) = 0;
+		   %Subst(DeCodDta:1:4) = '****';
+	  EndIf;
+	EndIf;
+
+other ; // Function code not valid
+  SqlState = '38003' ;
+endsl ;
+
+Return ;
+
+-- page 102
+INSERT INTO mduca1.filexml (doc)        
+VALUES                                  
+(GET_XML_FILE('/xmltest/XmlTest1.xml')) 
+WITH CS                                 
+
+SELECT XMLSERIALIZE(doc as CHAR(20000) CCSID 280) 
+FROM mduca1.filexml                              
+
+-- page 103
+SELECT w.*
+FROM   mduca1.filexml,
+XMLTABLE ('$d/orders/order/line' 
+ PASSING doc AS "d" 
+     COLUMNS                                                  
+       cliente     CHAR(8)  PATH '../@customer',                
+       dataOrdine  CHAR(10) PATH '../@date',             
+       articolo   CHAR(20)  PATH '@article',     
+       um         CHAR(20)  PATH '@um' DEFAULT 'MT',            
+       qty        CHAR(11)  PATH '@quantity' DEFAULT '0',
+       dataconsegna CHAR(10) PATH '@duedate'   
+) AS w      
+;
+
+-- page 106
+
+SELECT XMLSERIALIZE(XMLDOCUMENT(XMLELEMENT(NAME "ExportOrders", 
+       XMLAGG(
+       XMLROW(OrdNum AS "OrderNum",
+              OrdCli AS "Customer",
+              DataOrdine AS "Date",
+              OrdLine AS "Line",
+              TRIM(Articolo) AS "Article" 
+              OPTION ROW "Order" 
+         ) ) )                                       
+         ) AS VARCHAR(15000) CCSID 280 INCLUDING XMLDECLARATION  
+         ) AS RESPONSE                                         
+      FROM (SELECT * FROM mduca1.orddt00f)   a  
+
+-- page 107
+<?xml version="1.0" encoding="IBM280"?>
+<ExportOrders>
+	<Order>
+		<OrderNum>00000001</OrderNum>
+		<Customer>00022222</Customer>
+		<Date>2017-12-01</Date>
+		<Line>1</Line>
+		<Article>A1234-758-442</Article>
+	</Order>
+	<Order>
+		<OrderNum>00000001</OrderNum>
+		<Customer>00022222</Customer>
+		<Date>2017-12-01</Date>
+		<Line>2</Line>
+		<Article>E7658-8897-135</Article>
+	</Order>
+	<Order>
+		<OrderNum>00000001</OrderNum>
+		<Customer>00022222</Customer>
+		<Date>2017-12-01</Date>
+		<Line>3</Line>
+		<Article>R7821-995-3568</Article>
+	</Order>
+Ecc. . .
+</ExportOrders>
+
+
+-- page 109
+CREATE TABLE mduca1.json_in (doc  VARCHAR(32000) CCSID 280)
+
+INSERT INTO mduca1.json_in VALUES
+'{
+"customer" : "00000000",
+"date" : "2017-12-01",
+"line" : [
+	{"article" : "AB0102", "quantity" : "102.75", "um" : "MT", "duedate" : "2018-01-31" },
+	{"article" : "CK0775", "quantity" : "32.90",  "um" : "MT", "duedate" : "2018-02-28" },
+	{"article" : "GH9800", "quantity" : "240.00", "um" : "MT", "duedate" : "2018-02-15" }
+]
+}'
+;
+
+INSERT INTO mduca1.json_in VALUES
+'{
+"customer" : "00030574",
+"date" : "2017-12-14",
+"line" : [
+	{"article" : "ZM1045", "quantity" : "80.25", "um" : "MT", "duedate" : "2018-03-31"},
+	{"article" : "EC304",  "quantity" : "15.00", "um" : "MT", "duedate" : "2018-02-01"}
+]	
+}'
+;
+
+-- page 110
+SELECT t.*
+FROM   mduca1.json_in,
+JSON_TABLE(doc,
+ 'lax $'
+ COLUMNS(
+    cliente    CHAR(8)  PATH '$.customer',
+    dataord    DATE     PATH '$.date',
+    NESTED '$.line[*]'
+    COLUMNS(
+       articolo    CHAR(10)  PATH '$.article',
+       qty         NUMERIC(11, 2) PATH '$.quantity',
+       um          CHAR(2)   PATH  '$.um',
+       datacons    DATE      PATH  '$.duedate'       
+    )
+    )
+    ) t
+;    
+
+-- page 113
+SELECT JSON_OBJECT (
+  'order'    VALUE ordnum,
+  'customer' VALUE ordcli,
+  'line'  VALUE ordline,
+  'type'  VALUE tipoart,
+  'item'  VALUE articolo,
+  'um'    VALUE um,
+  'qty'   VALUE ordqty,
+  'price' VALUE prezzo,
+  'duedate'  VALUE datacons
+) 
+FROM mduca1.orddt00f a
+ORDER BY ordnum, ordline
+
+SELECT JSON_OBJECT (
+  'order' VALUE ordnum,
+  'customer' VALUE ordcli,
+  'line' VALUE ordline,
+  'type' VALUE tipoart,
+  'item' VALUE SUBSTR(articolo, 1, 5),
+  'um'   VALUE um,
+  'qty'  VALUE ordqty,
+  'price' VALUE prezzo,
+  'duedate'  VALUE datacons,
+  'daysleft' VALUE DAYS(datacons)-DAYS(CURRENT_DATE)
+) 
+FROM mduca1.orddt00f a
+ORDER BY ordnum, ordline
+
+-- page 114
+WITH a AS (
+ SELECT DISTINCT ordnum, ordcli
+ FROM mduca1.orddt00f
+ )
+SELECT JSON_OBJECT (
+'order' VALUE ordnum,
+'customer' VALUE ordcli,
+'lines' VALUE (SELECT JSON_ARRAYAGG (
+   JSON_OBJECT(
+   'line' VALUE ordline,
+   'type' VALUE tipoart,
+   'item' VALUE TRIM(articolo),
+   'um'   VALUE um,
+   'qty'  VALUE ordqty,
+   'price' VALUE prezzo,   
+   'duedate'  VALUE datacons
+   )) FROM mduca1.orddt00f b
+   WHERE a.ordnum=b.ordnum
+   )    FORMAT JSON
+) 
+FROM a
+
+-- page 117
+UPDATE mduca1.ordhd00f  h 
+SET    valore = (
+       SELECT SUM(ordqty * prezzo)        
+       FROM mduca1.orddt00f  d             
+       WHERE h.ordnum=d.ordnum  
+         AND d.annul = ' '           
+        )                                   
+WHERE   h.ordnum = '00000024'
+
+-- page 118
+UPDATE library.file
+SET   
+columnToUpdate = (
+-- In this SELECT we specify WHAT VALUE IS TO BE SET in the column to be updated. 
+-- This query must return ONE row only!
+   SELECT DISTINCT value
+   FROM   library.file2
+   WHERE  conditions2
+   ) 
+-- In this WHERE we select WHAT RECORDS ARE TO BE UPDATED for the file specified on the UPDATE
+WHERE
+   conditions1
+
+
+SELECT h.ordnum, CASE
+ WHEN  1 = (
+ SELECT DISTINCT 1 FROM mduca1.orddt00f d 
+ WHERE h.ordnum=d.ordnum 
+   AND YEAR(d.datacons) = YEAR(CURRENT DATE)
+   AND MONTH(d.datacons) = MONTH(CURRENT DATE)
+ )
+ THEN 'IN SCADENZA' ELSE 'OK' END scade
+FROM mduca1.ordhd00f h
+WHERE h.annul = ' '
+
+-- page 119
+-- Example 1: compares all columns
+SELECT *
+FROM  mduca1.orddt00f
+EXCEPT
+SELECT *
+FROM  mduca1.orddt_sav
+
+-- Example 2: compares just some columns
+SELECT ordnum, ordcli, ordline, articolo, ordqty, prezzo
+FROM mduca1.orddt00f
+EXCEPT
+SELECT ordnum, ordcli, ordline, articolo, ordqty, prezzo
+FROM mduca1.orddt_sav
+ORDER BY ordnum, ordline
+
+
+MERGE INTO 
+-- Destination file 
+mduca1.param00f AS a       
+-- Data to be merged       
+USING (SELECT *                            
+ FROM  mduca2.param00f ) b 
+-- common key 
+ON (a.app, a.parmname)=(b.app, b.parmname) 
+-- If found, updates the desired columns 
+WHEN MATCHED THEN                          
+ UPDATE
+SET a.parmdescr=b.parmdescr        
+-- If not found, inserts a row
+WHEN NOT MATCHED THEN                      
+ INSERT
+VALUES (
+ b.annul, 
+ b.app,            
+ b.parmname,
+ b.parmvalue, 
+ b.parmdescr,     
+ b.user, 
+ b.dttime)  
+
+-- page 120
+SELECT DAYNAME(CURRENT_TIMESTAMP)   CONCAT ', '
+CONCAT MONTHNAME(CURRENT_TIMESTAMP) CONCAT ' '
+CONCAT DAY(CURRENT_TIMESTAMP)       CONCAT ', ' 
+CONCAT YEAR(CURRENT_TIMESTAMP)
+FROM SYSIBM.SYSDUMMY1
+
+-- page 121
+VALUES(VARCHAR_FORMAT(CURRENT_TIMESTAMP, 'DAY, MONTH DD, YYYY'));
+
+
+SELECT CHAR(DATE(TO_DATE(CHAR(data01), 'YYYYMMDD')), eur)
+FROM mduca1.tabtest2   
+
+-- page 122
+SELECT ordnum, count(*) conteggio
+FROM   mduca1.orddt00f
+WHERE  annul =' '
+  AND  ordqty > 200
+GROUP BY ordnum
+HAVING count(*) > 1
+
+
+SELECT ordnum, ordline, count(*) conteggio
+FROM   mduca1.orddt2
+GROUP BY ordnum, ordline
+HAVING count(*) > 1
+
+-- page 125
+CALL QSYS2.GENERATE_SQL                         
+(DATABASE_OBJECT_NAME => 'TESTTAB',             
+ DATABASE_OBJECT_LIBRARY_NAME => 'MDUCA',     
+ DATABASE_OBJECT_TYPE => 'TABLE',               
+ DATABASE_SOURCE_FILE_NAME => 'QSQLSRC',        
+ DATABASE_SOURCE_FILE_LIBRARY_NAME => 'MDUCA',
+ DATABASE_SOURCE_FILE_MEMBER => 'TESTXXX',      
+ REPLACE_OPTION => '1',                         
+ CREATE_OR_REPLACE_OPTION => '1',               
+ SEVERITY_LEVEL => 10,                          
+ LABEL_OPTION => '1',                           
+ PRIVILEGES_OPTION => '0',                      
+ QUALIFIED_NAME_OPTION => '1',                  
+ STATEMENT_FORMATTING_OPTION => '0'             
+)                                               
+
+-- page 126
+CALL QSYS2.GENERATE_SQL                 
+('TESTTAB', 'MDUCA', 'TABLE',         
+ 'QSQLSRC', 'MDUCA', 'TESTXXX',       
+ REPLACE_OPTION => '1',                 
+ CREATE_OR_REPLACE_OPTION => '1',       
+ SEVERITY_LEVEL => 10,                  
+ LABEL_OPTION => '1',                   
+ PRIVILEGES_OPTION => '0',              
+ QUALIFIED_NAME_OPTION => '1',          
+ STATEMENT_FORMATTING_OPTION => '0'     
+)                     
+
+
+-- page 128
+CALL QSYS2.GENERATE_SQL                           
+(DATABASE_OBJECT_NAME => 'TESTTAB1L',            
+ DATABASE_OBJECT_LIBRARY_NAME => 'MDUCA',       
+ DATABASE_OBJECT_TYPE => 'VIEW',                  
+ DATABASE_SOURCE_FILE_NAME => 'QSQLSRC',          
+ DATABASE_SOURCE_FILE_LIBRARY_NAME => 'MDUCA',  
+ DATABASE_SOURCE_FILE_MEMBER => 'TESTXXX1L',      
+ REPLACE_OPTION => '1',                           
+ CREATE_OR_REPLACE_OPTION => '1',                 
+ SEVERITY_LEVEL => 10,                            
+ LABEL_OPTION => '1',                             
+ PRIVILEGES_OPTION => '0',                        
+ QUALIFIED_NAME_OPTION => '1',                    
+ STATEMENT_FORMATTING_OPTION => '0',              
+ INDEX_INSTEAD_OF_VIEW_OPTION => '1'              
+)                                                 
+
+
+-- page 131
+PGM
+DCL   VAR(&EOF)  TYPE(*LGL)  VALUE('0')
+DCLF    FILE(QTEMP/WRKFILE) OPNID(A)
+RCVF OPNID(A)
+MONMSG MSGID(CPF0000) EXEC(CHGVAR VAR(&EOF) VALUE('1'))
+DOWHILE COND(&EOF = '0')
+   /* processes file */
+   RCVF OPNID(A)
+   MONMSG MSGID(CPF0000) EXEC(CHGVAR VAR(&EOF) VALUE('1'))
+ENDDO
+ENDPGM
+
+
+PGM
+DCL   VAR(&NUM)  TYPE(*DEC) LEN(2 0) VALUE(1)
+DOUNTIL COND(&NUM = 13)
+   CALL PGM(PGMA) PARM(&NUM)
+   CHGVAR VAR(&NUM) VALUE(&NUM + 1)
+ENDDO
+ENDPGM
+
+
+PGM
+DCL   VAR(&NUM)  TYPE(*DEC) LEN(2 0) VALUE(1)
+DOFOR VAR(&NUM) FROM(1) TO(13) 
+   CALL PGM(PGMA) PARM(&NUM)
+ENDDO
+ENDPGM
+
+-- page 132
+PGM
+DCL   VAR(&EOF)  TYPE(*LGL)  VALUE('0')
+DCLF    FILE(QTEMP/WRKFILE) OPNID(A)
+RCVF OPNID(A)
+MONMSG MSGID(CPF0000) EXEC(CHGVAR VAR(&EOF) VALUE('1'))
+DOWHILE COND(&EOF = '0')
+   /* processes file */
+   RCVF OPNID(A)
+   MONMSG MSGID(CPF0000) EXEC(LEAVE)
+   IF COND(&STATUS *NE ' ') THEN(ITERATE)
+ENDDO
+ENDPGM
+
+
+PGM PARM(&ACTION)
+DCL   VAR(&ACTION)  TYPE(*CHAR) LEN(1)
+SELECT
+   WHEN       COND(&ACTION = '1') THEN(CALL PGM(PGMA)) 
+   WHEN       COND(&ACTION = '2') THEN(CALL PGM(PGMB)) 
+   OTHERWISE CMD(CALL PGM(PGMC))
+ENDSELECT
+ENDPGM
+
+-- page 133
+PGM  PARM(&STATUS)
+
+DCL        VAR(&Status)  TYPE(*CHAR) LEN(2)
+CALLSUBR  SUBR(TEST001)
+/* Routine */
+SUBR  SUBR(TEST001)
+   IF  COND(&STATUS = 'KO') THEN(RTNSUBR RTNVAL(-1))   
+ENDSUBR
+ENDPGM
+
+-- page 134
+PGM 
+DCL   VAR(&FLAG)   TYPE(*CHAR)  LEN(2)
+DCL   VAR(&PARMS)  TYPE(*CHAR) LEN(10) 
+DCL   VAR(&PARM01) TYPE(*CHAR) STG(*DEFINED) +
+                LEN(2) DEFVAR(&PARMS 1)
+DCL   VAR(&PARM02) TYPE(*CHAR) STG(*DEFINED) +
+                LEN(8) DEFVAR(&PARMS 3)
+DCLPRCOPT    DFTACTGRP(*NO)  ACTGRP(*CALLER)  +
+             BNDDIR(TESTLIB/BNDDIR1)
+CHGVAR  VAR(&PARM01) VALUE('A1')
+CHGVAR  VAR(&PARM02) VALUE('20160401')
+CALLPRC PRC('PROC01') PARM((&DSPARMS *BYVAL)) +
+   RTNVAL(&FLAG)
+ENDPGM
+
+
+/* ---- Procedure TEST001 ----- */
+PGM        PARM(&DSDATE)                                 
+DCL        VAR(&DSDATE)   TYPE(*CHAR) LEN(20)            
+DCL        VAR(&FROMDATE) TYPE(*CHAR) STG(*DEFINED) +    
+                          LEN(10) DEFVAR(&DSDATE)        
+DCL        VAR(&TODATE) TYPE(*CHAR) STG(*DEFINED) +      
+                          LEN(10) DEFVAR(&DSDATE 11)     
+CVTDAT     DATE(&FROMDATE) TOVAR(&TODATE) +              
+           FROMFMT(*YYMD) TOFMT(*DMYY) TOSEP(*NONE)      
+ENDPGM   
+
+-- page 135
+PGM        PARM(&DATEIN)                                 
+DCL        VAR(&DATEIN)   TYPE(*CHAR) LEN(10)            
+DCL        VAR(&DSDATE)   TYPE(*CHAR) LEN(20)            
+DCL        VAR(&FROMDATE) TYPE(*CHAR) STG(*DEFINED) +    
+             LEN(10) DEFVAR(&DSDATE)                     
+DCL        VAR(&TODATE) TYPE(*CHAR) STG(*DEFINED) +      
+             LEN(10) DEFVAR(&DSDATE 11)                  
+DCLPRCOPT  DFTACTGRP(*NO) ACTGRP(*CALLER) BNDDIR(TEST)   
+CHGVAR     VAR(&FROMDATE) VALUE(&DATEIN)                 
+CALLPRC    PRC(TEST001) PARM((&DSDATE *BYREF))           
+ENDPGM                                                   
+
+-- page 136
+PGM
+DCL   VAR(&NUM)  TYPE(*DEC) LEN(5 0) VALUE(1234)
+DCL   VAR(&ALFA)  TYPE(*CHAR) LEN(5)  
+CHGVAR VAR(&ALFA) VALUE(%CHAR(&NUM)) 
+/* &ALFA = '1234 '    */
+ENDPGM
+
+
+PGM
+DCL   VAR(&LOW)  TYPE(*CHAR) LEN(50)
+DCL   VAR(&UPP)  TYPE(*CHAR) LEN(50)  
+CHGVAR VAR(&LOW) VALUE('ho già detto che non berrò più caffè') 
+CHGVAR VAR(&UPP) VALUE(%UPPER(&LOW))
+/* &UPP = HO GIÀ DETTO CHE NON BERRÒ PIÙ CAFFÈ  */ 
+ENDPGM
+
+-- page 137
+PGM
+DCL   VAR(&VAR1)  TYPE(*CHAR) LEN(50) 
+DCL   VAR(&VAR2)  TYPE(*CHAR) LEN(50)  
+CHGVAR VAR(&VAR1) VALUE('   ---TITLE---   ') 
+CHGVAR VAR(&VAR2) VALUE(%TRIM(&VAR1))
+/* &VAR2 = '---TITLE---' */ 
+CHGVAR VAR(&VAR2) VALUE(%TRIMR(&VAR1))
+/* &VAR2 = '   ---TITLE---' */
+CHGVAR VAR(&VAR2) VALUE(%TRIM(&VAR1 ' -'))
+/* &VAR2 = 'TITLE' */
+ENDPGM
+
+
+PGM
+DCL   VAR(&DS)  TYPE(*CHAR) LEN(15) 
+DCL   VAR(&SUBF1)  TYPE(*CHAR) STG(*DEFINED) LEN(3) +
+      DEFVAR(&DS 1)  
+DCL   VAR(&SUBF2)  TYPE(*DEC) STG(*DEFINED) LEN(5 0) +
+      DEFVAR(&DS 4)
+DCL   VAR(&SUBF3)  TYPE(*CHAR) STG(*DEFINED) LEN(9) +
+      DEFVAR(&DS 7)
+ENDPGM
+
+-- page 138
+PGM PARM(&DATE)
+DCL   VAR(&DATE) TYPE(*DEC)  LEN(8 0)
+DCL   VAR(&SQL)  TYPE(*CHAR) LEN(5000) 
+CHGVAR     VAR(&SQL) VALUE('''INSERT INTO report00f +      
+             SELECT orddate, client, order, amount +    
+             FROM OrdHd00f  WHERE orddate ='' !! +          
+             %CHAR(&DATE) !! '' ORDER BY client, +        
+             orddate''')                                   
+RUNSQL     SQL(&SQL) COMMIT(*NONE)                         
+ENDPGM
+
+-- page 139
+PGM PARM(&DATE)
+DCL   VAR(&DATE) TYPE(*DEC)  LEN(8 0)
+DCL   VAR(&SQL)  TYPE(*CHAR) LEN(5000) 
+DCLPRCOPT    DFTACTGRP(*NO)  ACTGRP(*CALLER)  +
+             BNDDIR(MYLIB/MYBNDDIR)
+CHGVAR     VAR(&SQL) VALUE('''INSERT INTO report00f +      
+             SELECT orddate, client, order, amount +    
+             FROM OrdHd00f  WHERE orddate ='' !! +          
+             %CHAR(&DATE) !! '' ORDER BY client, +        
+             orddate''')                                   
+RUNSQL     SQL(&SQL) COMMIT(*NONE)                         
+ENDPGM
+
+-- page 157
+--  CLIPRX00F: Client surcharges                  
+                                                     
+CREATE OR REPLACE TABLE CLIPRX00F (                  
+  CodCli   CHAR(8) NOT NULL DEFAULT '' ,             
+  PerceAgg    NUMERIC(5, 2) NOT NULL DEFAULT 0 ,     
+  ImportoAgg  NUMERIC(11, 2) NOT NULL DEFAULT 0      
+  )                                                  
+  RCDFMT CLIPRX     ;                                
+LABEL ON COLUMN CLIPRX00F                            
+( CODCLI TEXT IS 'Client code' ,                  
+  PerceAgg   TEXT IS ' additional % ' ,                
+  ImportoAgg TEXT IS 'Additional amount' ) ;        
+                                                     
+// Exit program ORDPRX01
+// *ENTRY PLIST
+dcl-pr main  extpgm('ORDPRX01');
+   pCodCli   char(8);
+   pPrezzo   zoned(11: 2);
+end-pr;
+dcl-pi main;
+   pCodCli   char(8);
+   pPrezzo   zoned(11: 2);
+end-pi;
+
+dcl-s  perc         like(PerceAgg);
+dcl-s  importo      like(ImportoAgg);
+dcl-ds DS01 extname('CLIPRX00F') end-ds;
+
+*inLR=*on;
+Exec SQL
+  SET OPTION Commit=*none,
+			 CloSqlCsr=*EndActGRP,
+			 DlyPrp=*YES
+  ;
+Exec SQL
+  SET :perc = (
+   SELECT PerceAgg
+   FROM   CliPrx00f
+   WHERE  CodCli = :pCodCli
+   )
+   ;
+Exec SQL
+  SET :importo = (
+   SELECT ImportoAgg
+   FROM   CliPrx00f
+   WHERE  CodCli = :pCodCli
+   )
+   ;
+
+select;
+   when perc <> 0;
+	  pPrezzo = pPrezzo + (pPrezzo * perc / 100);
+   when importo <> 0;
+	  pPrezzo = pPrezzo + importo;
+endsl;
+return;
+
+-- page 158
+// Exit program ORDPRX01 - Prototype
+dcl-pr OrdPrx01  extpgm('ORDPRX01');
+   pCodCli   char(8);
+   pPrezzo   zoned(11:2);
+end-pr;
+
+// Price calculation
+  < standard logic >
+	. . . 
+// Invoking exit program ORDPRX01
+OrdPrx01 (CodCli: Prezzo);
+
+-- page 159
+--  DSORDPR01: Exit Program DS
+
+CREATE OR REPLACE TABLE DSORDPR01 (
+  CodCli      CHAR(8) NOT NULL DEFAULT '' ,
+  CodOrdine   CHAR(8) NOT NULL DEFAULT '' ,
+  DataOrdine  DATE ,
+  Divisa      CHAR(3) NOT NULL DEFAULT '' ,
+  ImportoTot  NUMERIC(11, 2) NOT NULL DEFAULT 0 ,
+  ModalConsegna CHAR(2) NOT NULL DEFAULT '' ,
+  ModalSpediz CHAR(2) NOT NULL DEFAULT '' , 
+  DataConsegna DATE ,
+  PerceAgg    NUMERIC(5, 2) NOT NULL DEFAULT 0 ,
+  ImportoAgg  NUMERIC(11, 2) NOT NULL DEFAULT 0
+  )
+
+  RCDFMT DSORDPR01R  ;
+
+LABEL ON COLUMN DSORDPR01
+( CodCli      TEXT IS 'Codice cliente' ,
+  CodOrdine   TEXT IS 'Codice ordine' ,
+  DataOrdine  TEXT IS 'Data ordine' ,
+  Divisa   TEXT IS 'Divisa ordine' ,
+  ImportoTot  TEXT IS 'Importo totale ordine' ,
+  ModalConsegna   TEXT IS 'Modalità di consegna' ,
+  ModalSpediz   TEXT IS 'Modalità di spedizione,
+  DataConsegna  TEXT IS 'Data consegna' ,
+  PerceAgg   TEXT IS '% aggiuntiva' ,
+  ImportoAgg TEXT IS 'Importo aggiuntivo' ) ;
+
+
+-- page 160
+dcl-ds  DSPRX01  extname('DSORDPR01')  end-ds;
+dcl-pr OrdPrx01  extpgm('ORDPRX01');
+  pDSOrd    likeDS(DSPRX01);
+end-pr;
+
+<...>
+// Invoke exit program ORDPRX01
+OrdPrx01 (DSPrx01);
+
+-- page 161
+*********************************************                       
+*  ANCLI00F                                                         
+*  Standard customer master file
+*********************************************                       
+          R ANCLI                                                   
+            ANNUL          1          TEXT('Annulment')          
+            CODCLI         8          TEXT('Customer code')        
+            RAGSOC        40          TEXT('Customer name')
+… ecc.       
+
+*********************************************                         
+*  ANCLIEX0F                                                          
+*  Customer master - EXTENSION                                    
+*********************************************                         
+          R ANCLIEX                                                   
+            CODCLI         8          TEXT('Customer code')          
+            RATING         2          TEXT('Rating') 
+… etc.        
+
+-- page 162
+CREATE OR REPLACE TABLE DtAgg00F  (                             
+Annul     CHAR(1)  NOT NULL DEFAULT ' ',                        
+Entita    CHAR(10) NOT NULL DEFAULT ' ',                        
+Chiave    CHAR(25) NOT NULL DEFAULT ' ',                        
+Dt_Name   CHAR(15) NOT NULL DEFAULT ' ',                        
+Dt_Value  CHAR(40) NOT NULL DEFAULT ' ',                        
+TimeIns   TIMESTAMP NOT NULL DEFAULT CURRENT TIMESTAMP,         
+TimeUpd   TIMESTAMP NOT NULL                                    
+          FOR EACH ROW ON UPDATE AS ROW CHANGE TIMESTAMP,       
+PRIMARY KEY (Entita, Chiave, Dt_Name)                                    
+)                                                               
+RCDFMT DtAgg                                                    
+;                                                               
+
+-- page 164
+CREATE OR REPLACE TABLE Param00F  (                                 
+Annul     CHAR(1)  NOT NULL DEFAULT ' ',                            
+ParmPgm   CHAR(10) NOT NULL DEFAULT ' ',                            
+ParmName  CHAR(15) NOT NULL DEFAULT ' ',                            
+ParmValue CHAR(80) NOT NULL DEFAULT ' ',                            
+ParmDesc  CHAR(50) NOT NULL DEFAULT ' ',                            
+TimeIns   TIMESTAMP NOT NULL DEFAULT CURRENT TIMESTAMP,             
+TimeUpd   TIMESTAMP NOT NULL                                        
+          FOR EACH ROW ON UPDATE AS ROW CHANGE TIMESTAMP,           
+PRIMARY KEY (ParmPgm, ParmName)                                     
+)                                                                   
+RCDFMT Param                                                        
+;                                                                   
+LABEL ON COLUMN Param00f (                                          
+Annul          TEXT IS 'Annulment'         ,                     
+ParmPgm        TEXT IS 'Program/procedure'  ,                     
+ParmName       TEXT IS 'Parameter name   '  ,                     
+ParmValue      TEXT IS 'Parameter value  '  ,                     
+ParmDesc       TEXT IS 'Parameter descr. '  ,                     
+TimeIns        TEXT IS 'Time of insert   '  ,                     
+TimeUpd        TEXT IS 'Time of update'                            
+)                                                                   
+;           
+
+-- page 165
+chain (pgm:'TEXT') Param00f;       
+if %found(Param00f);                   
+   if %scan(codeWhs:ParmValue) > 0;  
+      // Print text              
+   endif;                              
+endif;                                 
+
+
+-- page 166
+CREATE OR REPLACE TABLE LOGPF00F (                           
+  LOGTIME TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,     
+  LOGUSER CHAR(10) NOT NULL DEFAULT '' ,                     
+  LOGPGM CHAR(10) NOT NULL DEFAULT '' ,                      
+  LOGTXT CHAR(100) NOT NULL DEFAULT '' ,                     
+  LOGDTA CHAR(80) NOT NULL DEFAULT '' )                      
+                                                             
+  RCDFMT LOGPF      ;                                        
+                                                             
+LABEL ON TABLE LOGPF00F                                      
+  IS 'Generic PF for event logging' ;                          
+                                                             
+LABEL ON COLUMN LOGPF00F                                     
+( LOGTIME TEXT IS 'Event Timestamp' ,                       
+  LOGUSER TEXT IS 'User' ,                                 
+  LOGPGM TEXT IS 'Program' ,                               
+  LOGTXT TEXT IS 'Event text' ,                            
+  LOGDTA TEXT IS 'Event data' ) ;                           
+
+
+// LOGPF00F usage example
+// *ENTRY PLIST
+dcl-pr main  extpgm('TESTR06');
+   pParm     char(100);
+end-pr;
+dcl-pi main;
+   pParm     char(100);
+end-pi;
+
+dcl-s  textLog      char(100) ;
+dcl-s  dataLog      char(80)  ;
+// Program status data structure
+dcl-ds PgmDs extname('PSDS') psds qualified  end-ds;
+// Received parameters
+dcl-ds DSParm;
+   pCodCli     char(8);
+   pDataIniz   char(8);
+   pDataFine   char(8);
+end-ds;
+
+*inLR=*on;
+Exec SQL
+  SET OPTION Commit=*none,
+			 CloSqlCsr=*EndActGRP,
+			 DlyPrp=*YES
+  ;
+
+DSParm = pParm;
+textLog = 'CLI=&C DTINI=&D1  DTFIN=&D2' ;
+textlog = %scanrpl('&C':pCodCli:textLog);
+textlog = %scanrpl('&D1':pDataIniz:textLog);
+textlog = %scanrpl('&D2':pDataFine:textLog);
+
+Exec SQL
+  INSERT INTO LogPf00f VALUES (
+   CURRENT_TIMESTAMP,
+   :PgmDs.Proc ,
+   :PgmDs.User ,
+   :textLog,
+   :dataLog
+   )
+   ;
+ // processing;
+
+return;
+
+-- page 195
+@echo off
+set CLASSPATH=%CLASSPATH%;c:\SysDbg\jhall.jar
+set CLASSPATH=%CLASSPATH%;c:\SysDbg\jt400.jar
+set CLASSPATH=%CLASSPATH%;c:\SysDbg\tes.jar
+java utilities.DebugMgr
+
+
+--- Other sources available at: https://tinyurl.com/RPGdownloads-EN
+
